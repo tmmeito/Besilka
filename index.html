@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Бесилка — Мултиплеер (МК)</title>
+  <style>
+    :root{ --bg:#0b1020; --panel:#121a33; --ink:#e6ecff; --muted:#9aa3c7; --accent:#6aa6ff; --good:#18c29c; --bad:#ff6b6b; --pill:#1a244a }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:radial-gradient(1200px 600px at 70% -10%,#1a254d 0%,var(--bg) 60%);color:var(--ink);min-height:100vh;display:grid;place-items:center;padding:20px}
+    .wrap{width:min(1000px,100%)}
+    header{text-align:center;margin-bottom:14px}
+    header h1{margin:0;font-size:clamp(22px,4vw,36px)}
+    header p{margin:6px 0 0;color:var(--muted)}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05)}
+    .grid{display:grid;gap:16px;grid-template-columns:1fr 1.1fr}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .canvasPane{background:var(--panel);border-radius:12px;padding:12px}
+    canvas{width:100%;height:auto;display:block;border-radius:8px;background:#0d142b}
+    .uiPane{display:grid;grid-template-rows:auto auto auto 1fr auto;gap:12px}
+    .word{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;background:var(--panel);padding:14px;border-radius:12px;min-height:64px;font-weight:700;letter-spacing:2px;font-size:clamp(20px,4.5vw,34px)}
+    .word span{border-bottom:3px solid rgba(230,236,255,.15);min-width:24px;text-align:center;padding:2px 2px 4px}
+    .word .space{border-bottom:none;width:16px}
+    .status{text-align:center;color:var(--muted);min-height:24px}
+    .status .win{color:var(--good);font-weight:700}
+    .status .lose{color:var(--bad);font-weight:700}
+    .pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+    .pill{background:var(--pill);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:#cfd7ff;display:inline-flex;align-items:center;gap:6px}
+    .pill .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+    .pill.fast .dot{background:#18c29c}
+    .pill.quick .dot{background:#59d0ff}
+    .pill.med .dot{background:#ffcc66}
+    .pill.slow .dot{background:#ff6b6b}
+    .keyboard{display:grid;grid-template-columns:repeat(11,1fr);gap:8px}
+    @media(max-width:520px){.keyboard{grid-template-columns:repeat(8,1fr)}}
+    .keyboard button{background:#1a244a;border:1px solid rgba(255,255,255,.08);color:var(--ink);border-radius:10px;padding:10px 0;font-weight:700;cursor:pointer;transition:transform .05s ease,background .2s ease,opacity .2s ease}
+    .keyboard button:active{transform:translateY(1px)}
+    .keyboard button[disabled]{opacity:.45;cursor:not-allowed}
+    .keyboard .good{background:#123a34}
+    .keyboard .bad{background:#3a1a1a}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+    .controls button,.controls select{background:var(--accent);color:#081021;border:none;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(106,166,255,.35)}
+    .controls label{color:var(--muted);display:inline-flex;align-items:center;gap:8px;font-size:14px}
+    .controls input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    input[type="text"],input[type="password"],textarea{background:#101735;color:var(--ink);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;font-size:16px;flex:1;min-width:180px}
+    table{width:100%;border-collapse:separate;border-spacing:0 6px}
+    th,td{text-align:left;padding:8px 10px}
+    tbody tr{background:#0f1734}
+    tbody tr td:first-child{border-top-left-radius:10px;border-bottom-left-radius:10px}
+    tbody tr td:last-child{border-top-right-radius:10px;border-bottom-right-radius:10px}
+    .hint{color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Бесилка — Мултиплеер</h1>
+      <p>Играчите наизменично задаваат таен збор. Останатите треба да го погодат пред да истечат животите.</p>
+    </header>
+
+    <!-- ЕКРАН 1: ЛОБИ -->
+    <section id="screen-lobby" class="panel" aria-label="Лоби">
+      <h2 style="margin-top:0">1) Додади играчи</h2>
+      <div class="row" style="margin-bottom:8px">
+        <input id="playerName" type="text" placeholder="Име на играч" />
+        <button id="addPlayer">Додај</button>
+        <button id="startGame" title="Започни нова партија" disabled>Започни</button>
+      </div>
+      <div class="hint">Додај најмалку 2 играчи. Имињата можат да бидат на кирилица или латиница.</div>
+      <h3>Играч(и):</h3>
+      <ul id="playerList" style="list-style:none; padding-left:0; display:flex; flex-wrap:wrap; gap:8px"></ul>
+      <details style="margin-top:10px">
+        <summary>Поставки</summary>
+        <label class="row"><input type="checkbox" id="hardMode"> Тежок режим (6 животи наместо 10)</label>
+      </details>
+    </section>
+
+    <!-- ЕКРАН 2: ВНЕС НА ЗБОР -->
+    <section id="screen-set" class="panel" hidden>
+      <h2 style="margin-top:0">2) Таен збор</h2>
+      <p>Сетач: <b id="setterName">—</b></p>
+      <div class="row" style="margin-bottom:8px">
+        <input id="secretWord" type="text" placeholder="Внеси таен збор (македонски)" />
+        <button id="toggleSecret">Сокриј</button>
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <input id="hintInput" type="text" placeholder="(Опционално) Трага/категорија" />
+        <button id="beginRound">Започни рунда</button>
+      </div>
+      <div class="hint">Дозволени се букви, празнини и цртички. Зборот автоматски се претвора во ГОЛЕМИ БУКВИ.</div>
+    </section>
+
+    <!-- ЕКРАН 3: ИГРА -->
+    <section id="screen-game" class="panel grid" hidden>
+      <div class="canvasPane">
+        <canvas id="board" width="640" height="480" aria-label="Цртеж на бесилка"></canvas>
+      </div>
+      <div class="uiPane">
+        <div class="word" id="word" aria-live="polite"></div>
+        <div class="status" id="status"></div>
+        <div class="pills" id="speedPills"></div>
+        <div class="status" id="timer">Време: 0s</div>
+        <div class="keyboard" id="keyboard" aria-label="Екранска тастатура"></div>
+        <div class="controls">
+          <button id="giveUp">Предај се</button>
+          <button id="nextRound" hidden>Следна рунда</button>
+        </div>
+        <div class="hint" id="roundHint" style="text-align:center"></div>
+      </div>
+    </section>
+
+    <!-- ЕКРАН 4: НАЈДОБРИ -->
+    <section id="screen-scores" class="panel" style="margin-top:14px">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Табела</h2>
+        <div class="row">
+          <button id="resetScores" title="Ресетирај табела">Ресетирај</button>
+          <button id="resetAll" title="Избриши сè и започни одново">Целосен ресет</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Играч</th><th>Поени</th><th>Победи</th><th>Задавања</th></tr></thead>
+        <tbody id="scoreBody"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    // ———————————————— Константи ————————————————
+    const ABC_MK = [ 'А','Б','В','Г','Д','Ѓ','Е','Ж','З','Ѕ','И','Ј','К','Л','Љ','М','Н','Њ','О','П','Р','С','Т','Ќ','У','Ф','Х','Ц','Ч','Џ','Ш' ];
+    const ALLOWED = new Set([...ABC_MK, ' ', '-']);
+
+    // ———————————————— Состојба ————————————————
+    let players = []; // {name, points, wins, sets}
+    let setterIdx = 0; // чие е да задава
+    let secret = '';
+    let revealed = new Set();
+    let misses = new Set();
+    let lives = 10;
+    let frozen = false;
+    let hint = '';
+
+    // тајмер и фикс за тежина по рунда
+    let t0 = 0; let tInt = null; let roundHard = false;
+
+    // ———————————————— Елементи ————————————————
+    const el = (id) => document.getElementById(id);
+    const lobby = el('screen-lobby');
+    const setScr = el('screen-set');
+    const gameScr = el('screen-game');
+    const board = el('board');
+    const ctx = board.getContext('2d');
+    const wordEl = el('word');
+    const kbEl = el('keyboard');
+    const statusEl = el('status');
+    const roundHint = el('roundHint');
+    const timerEl = el('timer');
+    const pillsEl = el('speedPills');
+
+    // ———————————————— Помошни ————————————————
+    function show(id){ lobby.hidden = id!=='lobby'; setScr.hidden = id!=='set'; gameScr.hidden = id!=='game'; }
+    function uppercaseMk(str){ return str.toUpperCase(); }
+    function normSecret(raw){ const up = uppercaseMk(raw).trim(); return [...up].filter(ch => ALLOWED.has(ch)).join(''); }
+
+    function saveScores(){ localStorage.setItem('mk_hangman_scores', JSON.stringify(players)); }
+    function loadScores(){ try{ const d = JSON.parse(localStorage.getItem('mk_hangman_scores')||'[]'); if(Array.isArray(d)) players = d; }catch(e){} }
+
+    function renderPlayers(){
+      const ul = el('playerList'); ul.innerHTML = '';
+      players.forEach((p,i)=>{
+        const li = document.createElement('li'); li.style.background='#0f1734'; li.style.padding='6px 10px'; li.style.borderRadius='10px';
+        li.innerHTML = `<b>${p.name}</b> <span style=\"opacity:.7\">(${p.points} поени)</span> <button data-i=\"${i}\" style=\"margin-left:6px;background:#2a355f;border:none;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer\">✕</button>`;
+        ul.appendChild(li);
+      });
+      ul.querySelectorAll('button[data-i]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{ players.splice(+btn.dataset.i,1); renderPlayers(); refreshStartEnabled(); saveScores(); });
+      });
+    }
+
+    function refreshStartEnabled(){ el('startGame').disabled = players.length < 2; }
+
+    function renderScores(){
+      const body = el('scoreBody');
+      const rows = [...players].map((p)=>p).sort((a,b)=> b.points - a.points);
+      body.innerHTML = rows.map((p,idx)=>`<tr><td>${idx+1}</td><td>${p.name}</td><td><b>${p.points}</b></td><td>${p.wins||0}</td><td>${p.sets||0}</td></tr>`).join('');
+    }
+
+    // ———————————————— Тајмер ————————————————
+    function startTimer(){
+      t0 = performance.now();
+      clearInterval(tInt);
+      timerEl.textContent = 'Време: 0s';
+      tInt = setInterval(()=>{
+        const s = Math.floor((performance.now()-t0)/1000);
+        timerEl.textContent = `Време: ${s}s`;
+      }, 200);
+      pillsEl.innerHTML = '';
+    }
+    function stopTimer(){ clearInterval(tInt); tInt = null; }
+    function elapsedSeconds(){ return Math.floor((performance.now()-t0)/1000); }
+
+    // ———————————————— Игра ————————————————
+    function startSetScreen(){
+      show('set');
+      const setter = players[setterIdx];
+      setter.sets = (setter.sets||0)+1;
+      el('setterName').textContent = setter.name;
+      el('secretWord').value = '';
+      el('hintInput').value = '';
+      el('toggleSecret').textContent = 'Сокриј'; // старт: видливо
+      saveScores(); renderScores();
+    }
+
+    function startRound(){
+      secret = normSecret(el('secretWord').value);
+      if(!secret || ![...secret].some(ch=> ABC_MK.includes(ch))) { alert('Внеси валиден македонски збор.'); return; }
+      hint = el('hintInput').value.trim();
+      revealed = new Set();
+      misses = new Set();
+      lives = el('hardMode').checked ? 6 : 10;
+      roundHard = el('hardMode').checked; // заклучи тежина за рундата
+      frozen = false;
+      el('giveUp').disabled = false;
+      el('nextRound').hidden = true;
+      buildKeyboard();
+      draw(0,true);
+      renderWord();
+      statusEl.textContent = `Животи: ${lives} · Сетач: ${players[setterIdx].name}`;
+      roundHint.textContent = hint ? `Трага: ${hint}` : '';
+      startTimer();
+      show('game');
+    }
+
+    // ———————————————— ТИЕРИ (60/90/120) ————————————————
+    function speedTier(seconds){
+      if(seconds < 60) return { cls:'fast', label:'Молња', emoji:'⚡', guesserBonus:4, setterOnGuess:0 };
+      if(seconds < 90) return { cls:'quick', label:'Брзо', emoji:'🏃', guesserBonus:3, setterOnGuess:1 };
+      if(seconds < 120) return { cls:'med', label:'Средно', emoji:'⏱️', guesserBonus:2, setterOnGuess:2 };
+      return { cls:'slow', label:'Долго', emoji:'🐢', guesserBonus:0, setterOnGuess:3 };
+    }
+
+    function setterPointsOnFail(seconds){
+      // кога НЕ е погодено/предадено: база + временски бонус (построго за подолги рунди)
+      const base = roundHard ? 5 : 4;
+      const time = seconds < 60 ? 1 : seconds < 90 ? 2 : seconds < 120 ? 3 : 5;
+      return base + time;
+    }
+
+    // ———————————————— КРАЈ НА РУНДА ————————————————
+    function endRound(won){
+      if (frozen) return; // спречи двојно бодување
+      frozen = true;
+      stopTimer();
+      el('nextRound').hidden = false;
+      el('giveUp').disabled = true;
+
+      const secs = elapsedSeconds();
+      const tier = speedTier(secs);
+
+      // визуелен беџ
+      pillsEl.innerHTML = `<span class="pill ${tier.cls}"><span class="dot"></span> ${tier.emoji} ${tier.label} · ${secs}s</span>`;
+
+      if (won) {
+        // Ратери: 1 (база) + брзински бонус според тиер + (тежок режим +1)
+        const base = 1;
+        const hardWinBonus = roundHard ? 1 : 0;
+        players.forEach((p,i)=>{
+          if(i!==setterIdx){
+            p.points = (p.points||0) + base + tier.guesserBonus + hardWinBonus;
+            p.wins = (p.wins||0) + 1;
+          }
+        });
+        // Сетач: утеха според тиер +1 ако е тешко
+        let setterPts = tier.setterOnGuess + (roundHard ? 1 : 0);
+        players[setterIdx].points = (players[setterIdx].points||0) + setterPts;
+        statusEl.innerHTML += ` · Поени: Ратери +${base}+${tier.guesserBonus}${hardWinBonus?`+${hardWinBonus}`:''} секој · Сетач +${setterPts}`;
+      } else {
+        // Ратери: 0; Сетач: база + време
+        const setterPts = setterPointsOnFail(secs);
+        players[setterIdx].points = (players[setterIdx].points||0) + setterPts;
+        statusEl.innerHTML += ` · Сетач +${setterPts} (не е погодено)`;
+      }
+      saveScores(); renderScores();
+    }
+
+    function nextRound(){ el('nextRound').hidden = true; setterIdx = (setterIdx + 1) % players.length; startSetScreen(); }
+
+    // ———————————————— Рендер ————————————————
+    function buildKeyboard(){
+      kbEl.innerHTML = '';
+      ABC_MK.concat(['-',' ']).forEach(l=>{
+        const b = document.createElement('button'); b.textContent = l===' ' ? '␣' : l; b.dataset.key = l;
+        b.addEventListener('click', ()=> guess(l)); kbEl.appendChild(b);
+      });
+    }
+    function renderWord(){
+      wordEl.innerHTML='';
+      for(const ch of secret){
+        if(ch===' '){ const sp=document.createElement('span'); sp.className='space'; sp.textContent=' '; wordEl.appendChild(sp); }
+        else if(ch==='-'){ const s=document.createElement('span'); s.textContent='-'; wordEl.appendChild(s); }
+        else { const s=document.createElement('span'); s.textContent = revealed.has(ch) ? ch : '\u00A0'; wordEl.appendChild(s); }
+      }
+    }
+
+    function guess(letter){
+      if(frozen) return;
+      if(!ALLOWED.has(letter)) return;
+      if(revealed.has(letter) || misses.has(letter)) return;
+      const btn = [...kbEl.children].find(b=>b.dataset.key===letter);
+      if(secret.includes(letter)){
+        revealed.add(letter); if(btn) btn.classList.add('good');
+      }else{
+        misses.add(letter); lives=Math.max(0,lives-1); if(btn) btn.classList.add('bad'); draw(misses.size);
+      }
+      if(btn) btn.disabled = true;
+      renderWord();
+      checkEnd();
+    }
+
+    document.addEventListener('keydown',(e)=>{
+      if(gameScr.hidden) return; // само во игра
+      const key = e.key.toUpperCase();
+      const ch = key.length===1 ? key : (e.key===' ' ? ' ' : (e.key==='-'?'-':''));
+      if(ALLOWED.has(ch)) { e.preventDefault(); guess(ch); }
+    });
+
+    function checkEnd(){
+      if (frozen) return; // спречи повторна обработка
+      const uniq = new Set([...secret].filter(c=>c!==' ' && c!=='-'));
+      const won = [...uniq].every(c=> revealed.has(c));
+      if(won){ statusEl.innerHTML = `<span class=\"win\">Погодок!</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; endRound(true); return; }
+      if(lives<=0){ statusEl.innerHTML = `<span class=\"lose\">Нема повеќе животи.</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; revealed = uniq; renderWord(); endRound(false); return; }
+      statusEl.textContent = `Животи: ${lives} · Сетач: ${players[setterIdx].name}`;
+    }
+
+    // ———————————————— Canvas ————————————————
+    function draw(mistakes, wipe=false){
+      const dpr = window.devicePixelRatio || 1;
+      const rect = board.getBoundingClientRect();
+      const W = Math.max(480, Math.floor(rect.width));
+      const H = Math.floor(W*0.75);
+      board.width = Math.floor(W*dpr); board.height = Math.floor(H*dpr);
+      board.style.height = H+'px'; board.style.width = W+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.clearRect(0,0,W,H);
+      ctx.lineWidth=6; ctx.strokeStyle='#89a1ff'; ctx.lineCap='round';
+      line(40,H-30,W-40,H-30); // земја
+      line(100,H-30,100,60);   // столб
+      line(100,60,W*0.55,60);  // греда
+      line(W*0.55,60,W*0.55,110); // јажe
+      const s = Math.min(10, mistakes);
+      if(s>=1) circle(W*0.55,140,30);
+      if(s>=2) line(W*0.55,170,W*0.55,260);
+      if(s>=3) line(W*0.55,190,W*0.55-45,225);
+      if(s>=4) line(W*0.55,190,W*0.55+45,225);
+      if(s>=5) line(W*0.55,260,W*0.55-40,310);
+      if(s>=6) line(W*0.55,260,W*0.55+40,310);
+      if(s>=7) xEye(W*0.55-10,135);
+      if(s>=8) xEye(W*0.55+10,135);
+      if(s>=9) arc(W*0.55,150,10,Math.PI*0.1,Math.PI-Math.PI*0.1);
+      if(s>=10) bird(W*0.55+70,95);
+    }
+    function line(x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+    function circle(x,y,r){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke(); }
+    function arc(x,y,r,a1,a2){ ctx.beginPath(); ctx.arc(x,y,r,a1,a2); ctx.stroke(); }
+    function xEye(x,y){ ctx.beginPath(); ctx.moveTo(x-4,y-4); ctx.lineTo(x+4,y+4); ctx.moveTo(x+4,y-4); ctx.lineTo(x-4,y+4); ctx.stroke(); }
+    function bird(x,y){ ctx.beginPath(); ctx.moveTo(x-10,y); ctx.quadraticCurveTo(x,y-10,x+10,y); ctx.quadraticCurveTo(x,y-10,x-10,y); ctx.stroke(); }
+
+    // ———————————————— Жици ————————————————
+    el('addPlayer').addEventListener('click',()=>{
+      const name = el('playerName').value.trim();
+      if(!name) return;
+      players.push({name, points:0, wins:0, sets:0});
+      el('playerName').value='';
+      renderPlayers(); refreshStartEnabled(); saveScores(); renderScores();
+    });
+    el('playerName').addEventListener('keydown',(e)=>{ if(e.key==='Enter') el('addPlayer').click(); });
+
+    el('startGame').addEventListener('click',()=>{ setterIdx = 0; startSetScreen(); });
+
+    el('toggleSecret').addEventListener('click',()=>{
+      const inp = el('secretWord');
+      if (inp.type === 'text') { inp.type = 'password'; el('toggleSecret').textContent = 'Прикажи'; }
+      else { inp.type = 'text'; el('toggleSecret').textContent = 'Сокриј'; }
+    });
+
+    el('beginRound').addEventListener('click', startRound);
+    el('giveUp').addEventListener('click', () => {
+      if (frozen) return;
+      const ok = confirm('Сигурно ли се предаваш? Ова ќе ја заврши рундата и може да додели поен на сетачот.');
+      if (!ok) return;
+      lives = 0;
+      checkEnd();
+    });
+    el('nextRound').addEventListener('click', nextRound);
+
+    window.addEventListener('resize', ()=> draw(misses.size));
+
+    el('resetScores').addEventListener('click',()=>{
+      if(confirm('Дали да ја исчистам табелата?')){ players.forEach(p=>{p.points=0;p.wins=0;p.sets=0}); saveScores(); renderScores(); renderPlayers(); }
+    });
+
+    el('resetAll').addEventListener('click',()=>{
+      if(!confirm('Целосен ресет? Ова ќе ги избрише играчите, поените и поставките.')) return;
+      try { localStorage.removeItem('mk_hangman_scores'); } catch(e){}
+      players = [];
+      setterIdx = 0; secret = ''; revealed = new Set(); misses = new Set(); lives = 10; frozen = false; hint = '';
+      const hard = el('hardMode'); if (hard) hard.checked = false;
+      el('playerName').value='';
+      // Clear UI
+      el('word').innerHTML='';
+      el('keyboard').innerHTML='';
+      el('status').textContent='';
+      el('roundHint').textContent='';
+      pillsEl.innerHTML='';
+      stopTimer();
+      el('timer').textContent='Време: 0s';
+      renderPlayers(); renderScores(); refreshStartEnabled(); show('lobby');
+    });
+
+    // ———————————————— Иницијализација ————————————————
+    loadScores();
+    renderPlayers();
+    renderScores();
+    refreshStartEnabled();
+    show('lobby');
+  </script>
+</body>
+</html>
