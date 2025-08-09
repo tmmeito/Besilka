@@ -34,10 +34,10 @@
     .pill.quick .dot{background:#59d0ff}
     .pill.med .dot{background:#ffcc66}
     .pill.slow .dot{background:#ff6b6b}
-    .keyboard{display:grid;grid-template-columns:repeat(11,1fr);gap:8px}
-    @media(max-width:768px){.keyboard{grid-template-columns:repeat(10,1fr)}}
-    @media(max-width:520px){.keyboard{grid-template-columns:repeat(8,1fr)}}
-    .keyboard button{background:#1a244a;border:1px solid rgba(255,255,255,.08);color:var(--ink);border-radius:10px;padding:10px 0;font-weight:700;cursor:pointer;transition:transform .05s ease,background .2s ease,opacity .2s ease}
+    .keyboard{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+    @media(max-width:900px){.keyboard{grid-template-columns:repeat(8,1fr)}}
+    @media(max-width:520px){.keyboard{grid-template-columns:repeat(6,1fr)}}
+    .keyboard button{background:#1a244a;border:1px solid rgba(255,255,255,.08);color:var(--ink);border-radius:10px;padding:10px 0;font-weight:700;cursor:pointer;font-size:clamp(16px,4vw,28px);transition:transform .05s ease,background .2s ease,opacity .2s ease}
     .keyboard button:active{transform:translateY(1px)}
     .keyboard button[disabled]{opacity:.45;cursor:not-allowed}
     .keyboard .good{background:#123a34}
@@ -174,7 +174,7 @@
       const ul = el('playerList'); ul.innerHTML = '';
       players.forEach((p,i)=>{
         const li = document.createElement('li'); li.style.background='#0f1734'; li.style.padding='6px 10px'; li.style.borderRadius='10px';
-        li.innerHTML = `<b>${p.name}</b> <span style=\"opacity:.7\">(${p.points} поени)</span> <button data-i=\"${i}\" style=\"margin-left:6px;background:#2a355f;border:none;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer\">✕</button>`;
+        li.innerHTML = `<b>${p.name}</b> <span style="opacity:.7">(${p.points} поени)</span> <button data-i="${i}" style="margin-left:6px;background:#2a355f;border:none;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer">✕</button>`;
         ul.appendChild(li);
       });
       ul.querySelectorAll('button[data-i]').forEach(btn=>{
@@ -335,8 +335,8 @@
       if (frozen) return; // спречи повторна обработка
       const uniq = new Set([...secret].filter(c=>c!==' ' && c!=='-'));
       const won = [...uniq].every(c=> revealed.has(c));
-      if(won){ statusEl.innerHTML = `<span class=\"win\">Погодок!</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; endRound(true); return; }
-      if(lives<=0){ statusEl.innerHTML = `<span class=\"lose\">Нема повеќе животи.</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; revealed = uniq; renderWord(); endRound(false); return; }
+      if(won){ statusEl.innerHTML = `<span class="win">Погодок!</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; endRound(true); return; }
+      if(lives<=0){ statusEl.innerHTML = `<span class="lose">Нема повеќе животи.</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; revealed = uniq; renderWord(); endRound(false); return; }
       statusEl.textContent = `Животи: ${lives} · Сетач: ${players[setterIdx].name}`;
     }
 
