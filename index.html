@@ -46,7 +46,7 @@
     .keyboard .good{background:#123a34}
     .keyboard .bad{background:#3a1a1a}
     .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
-    .controls button,.controls select{background:var(--accent);color:#081021;border:none;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(106,166,255,.35)}
+    .btn,.controls select{background:var(--accent);color:#081021;border:none;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(106,166,255,.35)}
     .controls label{color:var(--muted);display:inline-flex;align-items:center;gap:8px;font-size:14px}
     .controls input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent)}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -71,8 +71,8 @@
       <h2 style="margin-top:0">1) Додади играчи</h2>
       <div class="row" style="margin-bottom:8px">
         <input id="playerName" type="text" placeholder="Име на играч" autocorrect="off" autocapitalize="none" spellcheck="false" />
-        <button id="addPlayer">Додај</button>
-        <button id="startGame" title="Започни нова партија" disabled>Започни</button>
+          <button id="addPlayer" class="btn">Додај</button>
+          <button id="startGame" class="btn" title="Започни нова партија" disabled>Започни</button>
       </div>
       <div class="hint">Додај најмалку 2 играчи. Имињата можат да бидат на кирилица или латиница.</div>
       <h3>Играч(и):</h3>
@@ -89,11 +89,11 @@
       <p>Сетач: <b id="setterName">—</b></p>
       <div class="row" style="margin-bottom:8px">
         <input id="secretWord" type="text" placeholder="Внеси таен збор (македонски)" autocorrect="off" autocapitalize="none" spellcheck="false" />
-        <button id="toggleSecret">Сокриј</button>
+          <button id="toggleSecret" class="btn">Сокриј</button>
       </div>
       <div class="row" style="margin-bottom:8px">
         <input id="hintInput" type="text" placeholder="(Опционално) Трага/категорија" autocorrect="off" autocapitalize="none" spellcheck="false" />
-        <button id="beginRound">Започни рунда</button>
+          <button id="beginRound" class="btn">Започни рунда</button>
       </div>
       <div class="hint">Дозволени се букви, празнини и цртички. Зборот автоматски се претвора во ГОЛЕМИ БУКВИ.</div>
     </section>
@@ -110,8 +110,8 @@
         <div class="status" id="timer">Време: 0s</div>
         <div class="keyboard" id="keyboard" aria-label="Екранска тастатура"></div>
         <div class="controls">
-          <button id="giveUp">Предај се</button>
-          <button id="nextRound" hidden>Следна рунда</button>
+          <button id="giveUp" class="btn">Предај се</button>
+          <button id="nextRound" class="btn" hidden>Следна рунда</button>
         </div>
         <div class="hint" id="roundHint" style="text-align:center"></div>
       </div>
@@ -122,8 +122,8 @@
       <div class="row" style="justify-content:space-between">
         <h2 style="margin:0">Табела</h2>
         <div class="row">
-          <button id="resetScores" title="Ресетирај табела">Ресетирај</button>
-          <button id="resetAll" title="Избриши сè и започни одново">Целосен ресет</button>
+          <button id="resetScores" class="btn" title="Ресетирај табела">Ресетирај</button>
+          <button id="resetAll" class="btn" title="Избриши сè и започни одново">Целосен ресет</button>
         </div>
       </div>
       <table>
