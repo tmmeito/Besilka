@@ -174,7 +174,7 @@
       const ul = el('playerList'); ul.innerHTML = '';
       players.forEach((p,i)=>{
         const li = document.createElement('li'); li.style.background='#0f1734'; li.style.padding='6px 10px'; li.style.borderRadius='10px';
-        li.innerHTML = `<b>${p.name}</b> <span style=\"opacity:.7\">(${p.points} поени)</span> <button data-i=\"${i}\" style=\"margin-left:6px;background:#2a355f;border:none;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer\">✕</button>`;
+        li.innerHTML = `<b>${p.name}</b> <span style="opacity:.7">(${p.points} поени)</span> <button data-i="${i}" style="margin-left:6px;background:#2a355f;border:none;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer">✕</button>`;
         ul.appendChild(li);
       });
       ul.querySelectorAll('button[data-i]').forEach(btn=>{
@@ -335,8 +335,8 @@
       if (frozen) return; // спречи повторна обработка
       const uniq = new Set([...secret].filter(c=>c!==' ' && c!=='-'));
       const won = [...uniq].every(c=> revealed.has(c));
-      if(won){ statusEl.innerHTML = `<span class=\"win\">Погодок!</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; endRound(true); return; }
-      if(lives<=0){ statusEl.innerHTML = `<span class=\"lose\">Нема повеќе животи.</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; revealed = uniq; renderWord(); endRound(false); return; }
+      if(won){ statusEl.innerHTML = `<span class="win">Погодок!</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; endRound(true); return; }
+      if(lives<=0){ statusEl.innerHTML = `<span class="lose">Нема повеќе животи.</span> Зборот беше <b>${secret}</b>. Кликни „Следна рунда“.`; revealed = uniq; renderWord(); endRound(false); return; }
       statusEl.textContent = `Животи: ${lives} · Сетач: ${players[setterIdx].name}`;
     }
 
