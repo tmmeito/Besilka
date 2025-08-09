@@ -1,7 +1,7 @@
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open('hangman-cache-v1').then(cache =>
-      cache.addAll(['./','./index.html'])
+      cache.addAll(['./','./index.html','./manifest.json'])
     )
   );
 });
