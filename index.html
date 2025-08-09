@@ -35,7 +35,8 @@
     .pill.med .dot{background:#ffcc66}
     .pill.slow .dot{background:#ff6b6b}
     .keyboard{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
-    @media(max-width:900px){.keyboard{grid-template-columns:repeat(8,1fr)}}
+    @media(max-width:1024px){.keyboard{grid-template-columns:repeat(8,1fr)}}
+    @media(max-width:900px){.keyboard{grid-template-columns:repeat(7,1fr)}}
     @media(max-width:520px){.keyboard{grid-template-columns:repeat(6,1fr)}}
     .keyboard button{background:#1a244a;border:1px solid rgba(255,255,255,.08);color:var(--ink);border-radius:10px;padding:10px 0;font-weight:700;cursor:pointer;font-size:clamp(16px,4vw,28px);transition:transform .05s ease,background .2s ease,opacity .2s ease}
     .keyboard button:active{transform:translateY(1px)}
